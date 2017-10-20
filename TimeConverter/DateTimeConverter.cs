@@ -6,42 +6,102 @@ using System.Text.RegularExpressions;
 using TimeConverter.Exceptions;
 using System.Threading.Tasks;
 using System.Diagnostics.Contracts;
+using Task2;
 
 namespace TimeConverter
 {
     public class DateTimeConverter
     {
-        private readonly string _dateTimePattern =
-            "(19|20)\\d\\d" +    //year
-            "\\." + "(1[012]|0?[1-9])" + //month
-            "\\." + "([12]\\d|3[01]|0?[1-9])" + //day
-            "[ Tt](?<hh>2[0-3]|[01]?\\d):(?<mm>[0-5]?\\d):(?<ss>[0-5]?\\d)" + //hh:mm:ss
-            "( ?(?<tzhh>[+-](2[0-3]|[01]?\\d))(:(?<tzmm>[0-5]?\\d))?[Zz]?|[Zz])"; //timezone
         private readonly int secondsInDay = 24 * 60 * 60;
+        private readonly IDateTimeParser dateTimeParser;
 
-        public int ConvertToSeconds(string dateTime)
+        public DateTimeConverter(IDateTimeParser dateTimeParser)
+        {
+            this.dateTimeParser = dateTimeParser;
+        }
+
+        public string ConvertToSeconds(string dateTime)
+        {
+            UtcTime time = ParseDateTime(dateTime);
+
+            int totalSeconds = time.Hours * 3600 + time.Minutes * 60 + time.Seconds;
+            int totalTimeZoneSeconds = time.TimeZoneHours * 3600 + time.TimeZoneMinutes * 60;
+
+            int secondsUtc = (totalSeconds - totalTimeZoneSeconds + secondsInDay) % secondsInDay;
+            return secondsUtc.ToString();
+        }
+
+        public string ConvertToLocalTime(string seconds, string timeZone)
+        {
+            int secondsUtc = ParseSeconds(seconds);
+            TimeZone tz = ParseTimeZone(timeZone);
+
+            int timeZoneSeconds = (tz.Hours * 3600 + tz.Minutes * 60) * tz.TimeZoneSign;
+            int totalLocalSeconds = (secondsUtc + timeZoneSeconds + secondsInDay) % secondsInDay;
+            int hours = totalLocalSeconds / 3600;
+            totalLocalSeconds %= 3600;
+            int minutes = totalLocalSeconds / 60;
+            int localSeconds = totalLocalSeconds % 60;
+            return $"{hours:00}:{minutes:00}:{localSeconds:00}";
+        }
+
+        private int ParseSeconds(string secondsStr)
+        {
+            int seconds;
+            try
+            {
+                seconds = secondsStr.ParseInt();
+            }
+            catch (Exception ex)
+            {
+                throw new TimeConverterException($"Cannot parse {nameof(secondsStr)}", ex);
+            }
+
+            if (seconds < 0 || seconds / 3600 >= 24)
+            {
+                throw new ArgumentOutOfRangeException($"{nameof(secondsStr)} argument is not in 0-24h range");
+            }
+
+            return seconds;
+        }
+
+        private TimeZone ParseTimeZone(string timeZone)
+        {
+            TimeZone tz;
+            try
+            {
+                tz = dateTimeParser.ParseTimeZone(timeZone);
+            }
+            catch (InvalidTimeZoneFormatException) { throw; }
+            catch (ArgumentNullException) { throw; }
+            catch (Exception ex)
+            {
+                throw new TimeConverterException($"Cannot parse {nameof(timeZone)}", ex);
+            }
+
+            return tz;
+        }
+
+        private UtcTime ParseDateTime(string dateTime)
         {
             if (dateTime == null)
             {
                 throw new ArgumentNullException($"{dateTime} is null");
             }
 
-            Match match = Regex.Match(dateTime, _dateTimePattern);
-            if (!match.Success || match.Length != dateTime.Length)
+            UtcTime time;
+            try
             {
-                throw new InvalidDateTimeFormatException($"{nameof(dateTime)} has invalid format");
+                time = dateTimeParser.ParseDateTime(dateTime);
+            }
+            catch (InvalidDateTimeFormatException) { throw; }
+            catch (ArgumentNullException) { throw; }
+            catch (Exception ex)
+            {
+                throw new TimeConverterException($"Cannot parse {nameof(dateTime)}", ex);
             }
 
-            int hours = int.Parse(match.Groups["hh"].Value);
-            int minutes = int.Parse(match.Groups["mm"].Value);
-            int seconds = int.Parse(match.Groups["ss"].Value);
-            int totalSeconds = hours * 3600 + minutes * 60 + seconds;
-            int timeZoneHours = int.Parse(match.Groups["tzhh"].Value);
-            int timeZoneMinutes = int.Parse(match.Groups["tzmm"].Value);
-            int totalTimeZoneSeconds = timeZoneHours * 3600 + timeZoneMinutes * 60;
-
-            int secondsUtc = (totalSeconds - totalTimeZoneSeconds + secondsInDay) % secondsInDay;
-            return secondsUtc;
+            return time;
         }
     }
 }
