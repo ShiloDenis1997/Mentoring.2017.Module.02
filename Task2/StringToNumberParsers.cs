@@ -31,8 +31,7 @@ namespace Task2
                 checked
                 {
                     result = numString.Substring(startPos)
-                        .Aggregate(0, (res, symbol) => res * 10 + GetNumber(symbol));
-                    result *= sign;
+                        .Aggregate(0, (res, symbol) => res * 10 + GetNumber(symbol) * sign);
                 }
             }
             catch (OverflowException oex)
