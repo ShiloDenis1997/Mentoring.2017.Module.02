@@ -6,7 +6,10 @@ namespace TimeConverter
 {
     public class DateTimeConverter
     {
-        private readonly int secondsInDay = 24 * 60 * 60;
+        private const int secondsInDay = 24 * 60 * 60;
+        private const int secondsInHour = 3600;
+        private const int secondsInMinute = 60;
+        private const int hoursInDay = 24;
         private readonly IDateTimeParser dateTimeParser;
 
         public DateTimeConverter(IDateTimeParser dateTimeParser)
@@ -19,8 +22,9 @@ namespace TimeConverter
             UtcTime time = ParseDateTime(dateTime);
             TimeZone timeZone = time.TimeZone;
 
-            int totalSeconds = time.Hours * 3600 + time.Minutes * 60 + time.Seconds;
-            int totalTimeZoneSeconds = (timeZone.Hours * 3600 + timeZone.Minutes * 60) * timeZone.TimeZoneSign;
+            int totalSeconds = time.Hours * secondsInHour + time.Minutes * secondsInMinute + time.Seconds;
+            int totalTimeZoneSeconds = 
+                (timeZone.Hours * secondsInHour + timeZone.Minutes * secondsInMinute) * timeZone.TimeZoneSign;
 
             int secondsUtc = (totalSeconds - totalTimeZoneSeconds + secondsInDay) % secondsInDay;
             return secondsUtc.ToString();
@@ -31,12 +35,12 @@ namespace TimeConverter
             int secondsUtc = ParseSeconds(seconds);
             TimeZone tz = ParseTimeZone(timeZone);
 
-            int timeZoneSeconds = (tz.Hours * 3600 + tz.Minutes * 60) * tz.TimeZoneSign;
+            int timeZoneSeconds = (tz.Hours * secondsInHour + tz.Minutes * secondsInMinute) * tz.TimeZoneSign;
             int totalLocalSeconds = (secondsUtc + timeZoneSeconds + secondsInDay) % secondsInDay;
-            int hours = totalLocalSeconds / 3600;
-            totalLocalSeconds %= 3600;
-            int minutes = totalLocalSeconds / 60;
-            int localSeconds = totalLocalSeconds % 60;
+            int hours = totalLocalSeconds / secondsInHour;
+            totalLocalSeconds %= secondsInHour;
+            int minutes = totalLocalSeconds / secondsInMinute;
+            int localSeconds = totalLocalSeconds % secondsInMinute;
             return $"{hours:00}:{minutes:00}:{localSeconds:00}";
         }
 
@@ -52,7 +56,7 @@ namespace TimeConverter
                 throw new TimeConverterException($"Cannot parse {nameof(secondsStr)}", ex);
             }
 
-            if (seconds < 0 || seconds / 3600 >= 24)
+            if (seconds < 0 || seconds / secondsInHour >= hoursInDay)
             {
                 throw new ArgumentOutOfRangeException($"{nameof(secondsStr)} argument is not in 0-24h range");
             }
