@@ -62,6 +62,11 @@ namespace TimeConverter
 
         private TimeZone ParseTimeZone(string timeZone)
         {
+            if (timeZone == null)
+            {
+                throw new ArgumentNullException($"{nameof(timeZone)} is null");
+            }
+
             TimeZone tz;
             try
             {
