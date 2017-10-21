@@ -16,6 +16,14 @@ namespace TimeConverter
         /// <paramref name="dateTime"/> has invalid format </exception>
         UtcTime ParseDateTime(string dateTime);
 
+        /// <summary>
+        /// Parses time zone string
+        /// </summary>
+        /// <param name="timeZone">Time zone string. Example: "+3:00"</param>
+        /// <returns><see cref="TimeZone"/> object with parsed data</returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="timeZone"/> is null</exception>
+        /// <exception cref="InvalidTimeZoneFormatException">Throws if <paramref name="timeZone"/>
+        /// has invalid format</exception>
         TimeZone ParseTimeZone(string timeZone);
     }
 }

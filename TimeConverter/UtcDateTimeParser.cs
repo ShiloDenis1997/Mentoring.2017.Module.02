@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Task2;
 using TimeConverter.Exceptions;
 
@@ -43,8 +39,7 @@ namespace TimeConverter
                 Hours = ParseGroupValue(match, "hh"),
                 Minutes = ParseGroupValue(match, "mm"),
                 Seconds = ParseGroupValue(match, "ss"),
-                TimeZoneHours = ParseGroupValue(match, "tzhh"),
-                TimeZoneMinutes = ParseGroupValue(match, "tzmm")
+                TimeZone = GetTimeZoneFromMatch(match)
             };
         }
 
@@ -61,6 +56,11 @@ namespace TimeConverter
                 throw new InvalidTimeZoneFormatException($"{nameof(timeZone)} has invalid format");
             }
 
+            return GetTimeZoneFromMatch(match);
+        }
+
+        private TimeZone GetTimeZoneFromMatch(Match match)
+        {
             int hours = ParseGroupValue(match, "tzhh");
             return new TimeZone
             {

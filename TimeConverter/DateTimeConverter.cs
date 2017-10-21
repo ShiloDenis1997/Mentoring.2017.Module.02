@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using TimeConverter.Exceptions;
-using System.Threading.Tasks;
-using System.Diagnostics.Contracts;
 using Task2;
 
 namespace TimeConverter
@@ -23,9 +17,10 @@ namespace TimeConverter
         public string ConvertToSeconds(string dateTime)
         {
             UtcTime time = ParseDateTime(dateTime);
+            TimeZone timeZone = time.TimeZone;
 
             int totalSeconds = time.Hours * 3600 + time.Minutes * 60 + time.Seconds;
-            int totalTimeZoneSeconds = time.TimeZoneHours * 3600 + time.TimeZoneMinutes * 60;
+            int totalTimeZoneSeconds = (timeZone.Hours * 3600 + timeZone.Minutes * 60) * timeZone.TimeZoneSign;
 
             int secondsUtc = (totalSeconds - totalTimeZoneSeconds + secondsInDay) % secondsInDay;
             return secondsUtc.ToString();
