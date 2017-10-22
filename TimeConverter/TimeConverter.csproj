@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TimeConstants.cs" />
     <Compile Include="Exceptions\InvalidDateTimeFormatException.cs" />
     <Compile Include="Exceptions\InvalidTimeZoneFormatException.cs" />
     <Compile Include="Exceptions\TimeConverterException.cs" />

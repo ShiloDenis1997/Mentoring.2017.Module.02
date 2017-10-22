@@ -31,7 +31,8 @@ namespace TimeConverter
             Match match = Regex.Match(dateTime, _dateTimePattern);
             if (!match.Success || match.Length != dateTime.Length)
             {
-                throw new InvalidDateTimeFormatException($"{nameof(dateTime)} has invalid format");
+                throw new InvalidDateTimeFormatException($"{nameof(dateTime)} has invalid format. " +
+                    " Should be YYYY.MM.DDtHH:MM:SS (+|-)HH:MMZ");
             }
 
             return new UtcTime
@@ -53,7 +54,8 @@ namespace TimeConverter
             Match match = Regex.Match(timeZone, _timeZonePattern);
             if (!match.Success || match.Length != timeZone.Length)
             {
-                throw new InvalidTimeZoneFormatException($"{nameof(timeZone)} has invalid format");
+                throw new InvalidTimeZoneFormatException($"{nameof(timeZone)} has invalid format." +
+                    " Should be (+|-)HH:MM");
             }
 
             return GetTimeZoneFromMatch(match);
