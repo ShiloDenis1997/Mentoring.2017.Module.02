@@ -22,7 +22,7 @@ namespace TimeConverter.Test
             _mockDateTimeParser.Reset();
         }
 
-        [Test, TestCaseSource("CorrectTimeToSecondTestCases")]
+        [Test, TestCaseSource(nameof(CorrectTimeToSecondTestCases))]
         public void CorrectTimeToSecond_RightSecondsExpected(UtcTime utcTime, string expectedSeconds)
         {
             _mockDateTimeParser.Setup(p => p.ParseDateTime(It.IsAny<string>())).Returns(utcTime);
@@ -43,7 +43,7 @@ namespace TimeConverter.Test
             }
         }
 
-        [Test, TestCaseSource("CorrectSecondsToTimeTestCases")]
+        [Test, TestCaseSource(nameof(CorrectSecondsToTimeTestCases))]
         public void CorrectSecondsToTime_CorrectLocalTime(
             string seconds, TimeZone timeZone, string expectedLocalTime)
         {

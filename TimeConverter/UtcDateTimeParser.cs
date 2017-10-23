@@ -25,7 +25,7 @@ namespace TimeConverter
         {
             if (dateTime == null)
             {
-                throw new ArgumentNullException($"{dateTime} is null");
+                throw new ArgumentNullException($"{nameof(dateTime)} is null");
             }
 
             Match match = Regex.Match(dateTime, _dateTimePattern);

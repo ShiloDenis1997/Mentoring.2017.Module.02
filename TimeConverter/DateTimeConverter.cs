@@ -86,7 +86,7 @@ namespace TimeConverter
         {
             if (dateTime == null)
             {
-                throw new ArgumentNullException($"{dateTime} is null");
+                throw new ArgumentNullException($"{nameof(dateTime)} is null");
             }
 
             UtcTime time;
